@@ -395,9 +395,12 @@ class HeadLink extends Placeholder\Container\AbstractStandalone
             }
         }
 
+        // https://github.com/zendframework/zend-view/blob/b838a5debffdb25b6f6d6e93ded56ada29ecedae/src/Helper/HeadLink.php#L404
         if (0 < count($args) && is_array($args[0])) {
             $extras = array_shift($args);
             $extras = (array) $extras;
+        } else {
+            $extras = [];
         }
 
         $attributes = compact('rel', 'type', 'href', 'media', 'conditionalStylesheet', 'extras');
