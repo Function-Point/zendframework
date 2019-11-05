@@ -79,7 +79,8 @@ abstract class AbstractResultSet implements Iterator, ResultSetInterface
             $first = current($dataSource);
             reset($dataSource);
             $this->count = count($dataSource);
-            $this->fieldCount = count($first);
+            // https://github.com/zendframework/zend-db/blob/4c68f2c33beb76d63a59c5bd5e6c96c9763966d7/src/ResultSet/AbstractResultSet.php#L80
+            $this->fieldCount = $first === false ? 0 : count($first);
             $this->dataSource = new ArrayIterator($dataSource);
             $this->buffer = -1; // array's are a natural buffer
         } elseif ($dataSource instanceof IteratorAggregate) {

@@ -227,7 +227,13 @@ abstract class AbstractSql implements SqlInterface
             if (isset($paramSpecs[$position]['combinedby'])) {
                 $multiParamValues = array();
                 foreach ($paramsForPosition as $multiParamsForPosition) {
-                    $ppCount = count($multiParamsForPosition);
+                    // https://github.com/zendframework/zend-db/blob/4c68f2c33beb76d63a59c5bd5e6c96c9763966d7/src/Sql/AbstractSql.php#L244
+                    if (is_array($multiParamsForPosition)) {
+                        $ppCount = count($multiParamsForPosition);
+                    } else {
+                        $ppCount = 1;
+                    }
+
                     if (!isset($paramSpecs[$position][$ppCount])) {
                         throw new Exception\RuntimeException(sprintf(
                             'A number of parameters (%d) was found that is not supported by this specification',
