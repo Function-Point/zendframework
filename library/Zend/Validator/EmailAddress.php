@@ -528,7 +528,11 @@ class EmailAddress extends AbstractValidator
      */
     protected function idnToAscii($email)
     {
+        // https://github.com/zendframework/zend-validator/blob/92e81c0563bf2f9f3e20dac4d97a68d175e7e278/src/EmailAddress.php#L556
         if (extension_loaded('intl')) {
+            if (defined('INTL_IDNA_VARIANT_UTS46')) {
+                return (idn_to_ascii($email, 0, INTL_IDNA_VARIANT_UTS46) ?: $email);
+            }
             return (idn_to_ascii($email) ?: $email);
         }
         return $email;
@@ -539,10 +543,23 @@ class EmailAddress extends AbstractValidator
      * @param string $email the ASCII encoded email
      * @return string
      */
+    // https://github.com/zendframework/zend-validator/blob/92e81c0563bf2f9f3e20dac4d97a68d175e7e278/src/EmailAddress.php#L570
     protected function idnToUtf8($email)
     {
+        if (strlen($email) == 0) {
+            return $email;
+        }
         if (extension_loaded('intl')) {
-            return idn_to_utf8($email);
+            // The documentation does not clarify what kind of failure
+            // can happen in idn_to_utf8. One can assume if the source
+            // is not IDN encoded, it would fail, but it usually returns
+            // the source string in those cases.
+            // But not when the source string is long enough.
+            // Thus we default to source string ourselves.
+            if (defined('INTL_IDNA_VARIANT_UTS46')) {
+                return idn_to_utf8($email, 0, INTL_IDNA_VARIANT_UTS46) ?: $email;
+            }
+            return idn_to_utf8($email) ?: $email;
         }
         return $email;
     }
