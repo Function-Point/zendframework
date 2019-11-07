@@ -224,22 +224,27 @@ abstract class AbstractControllerTestCase extends PHPUnit_Framework_TestCase
             parse_str($queryString, $query);
         }
 
-        if ($method == HttpRequest::METHOD_POST) {
-            if (count($params) != 0) {
-                $post = $params;
+        // https://github.com/zendframework/zend-test/blob/c9619a4489508f9ad4b4675a0d538405c0245e33/src/PHPUnit/Controller/AbstractControllerTestCase.php#L261
+        if ($params) {
+            switch ($method) {
+                case HttpRequest::METHOD_POST:
+                    $post = $params;
+                    break;
+                case HttpRequest::METHOD_GET:
+                case HttpRequest::METHOD_DELETE:
+                    $query = array_merge($query, $params);
+                    break;
+                case HttpRequest::METHOD_PUT:
+                case HttpRequest::METHOD_PATCH:
+                    $content = http_build_query($params);
+                    $request->setContent($content);
+                    break;
+                default:
+                    trigger_error(
+                        'Additional params is only supported by GET, POST, PUT and PATCH HTTP method',
+                        E_USER_NOTICE
+                    );
             }
-        } elseif ($method == HttpRequest::METHOD_GET) {
-            $query = array_merge($query, $params);
-        } elseif ($method == HttpRequest::METHOD_PUT || $method == HttpRequest::METHOD_PATCH) {
-            if (count($params) != 0) {
-                $content = http_build_query($params);
-                $request->setContent($content);
-            }
-        } elseif ($params) {
-            trigger_error(
-                'Additional params is only supported by GET, POST, PUT and PATCH HTTP method',
-                E_USER_NOTICE
-            );
         }
 
         $request->setMethod($method);

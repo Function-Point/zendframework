@@ -252,7 +252,12 @@ abstract class AbstractResultSet implements Iterator, ResultSetInterface
         if ($this->count !== null) {
             return $this->count;
         }
-        $this->count = count($this->dataSource);
+
+        // https://github.com/zendframework/zend-db/blob/4c68f2c33beb76d63a59c5bd5e6c96c9763966d7/src/ResultSet/AbstractResultSet.php#L260
+        if ($this->dataSource instanceof Countable) {
+            $this->count = count($this->dataSource);
+        }
+
         return $this->count;
     }
 
